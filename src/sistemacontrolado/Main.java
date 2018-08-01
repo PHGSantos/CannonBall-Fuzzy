@@ -22,9 +22,13 @@ public class Main {
         
         double tempo  = 0;
         double limiteDeTempo = 10;
-        
-        SistemaControlado sc = new SistemaControlado(45, 50, 10);
-        
+        double Fmax = 200;//força/vel max
+    
+        //                                           Ao, Vo, Yc, Xa, Ya
+        SistemaControlado sc = new SistemaControlado(45, Fmax/2, 2, 120, 0);
+        //sc.run();
+        //sc.run2();
+        sc.run3();
         
     }
     
