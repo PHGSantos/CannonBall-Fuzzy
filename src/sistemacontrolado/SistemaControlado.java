@@ -17,95 +17,25 @@ public class SistemaControlado {
     private double Xa, Ya;//posição do alvo
     private double Yc;//altura do canhão em relação ao solo
     private double Vx, Vy;
+    private boolean done;
+    private double DX, DY;
     /*
     Obs: canhão está em X=0
          altura do solo Y=0
     */
     
-    public SistemaControlado(double Ao, double Vo, double Yc, double Xa, double Ya){
-        this.Ao = Ao;
+    public SistemaControlado(){
+        this.done = false;
+    }
+    
+    public void run(double Ao, double Vo, double Yc, double Xa, double Ya){
+        
+        this.Ao = Math.toRadians(Ao);
         this.Vo = Vo;
         this.Yc = Yc;
         this.Xa = Xa;
         this.Ya = Ya;
-    }
-    
-    
-    public void run(){
-        double t;
-        Vy = calcVy();
-        Vx = calcVx();
         
-        double t1 = (Vy + Math.sqrt(Math.pow(Vy, 2) + 2*g*Yc))/g;
-        double t2 = (Vy - Math.sqrt(Math.pow(Vy, 2) + 2*g*Yc))/g;
-        
-        System.out.println((g/2)+"t²-"+Vy+"t-"+Yc);
-        System.out.println("t1 = "+t1);
-        System.out.println("t2 = "+t2);
-        
-        if(t1 > t2)
-            t = t1;
-        else
-            t = t2;
-        
-        if(t < 0){
-            System.out.println("erro: tempo negativo");
-        }else{
-        
-        double Xt = Vx*t;
-        double Yt = Yc + Vy*t - g*Math.pow(t, 2)/2;
-        
-        //alcance máximo em X
-        double Xr = (Math.pow(Vo, 2)*Math.sin(2*Ao))/g;
-        double Yr =0;
-        
-        double dx = Xr - Xa;
-        double dy = Yr - Ya;
-        
-        System.out.println("Saída da Simulação do canhão:");
-        System.out.println("t = "+t);
-        System.out.println("Vx = "+Vx);
-        System.out.println("Vy = "+Vy);
-        System.out.println("X(t)= "+Xt);
-        System.out.println("Y(t) = "+Yt);
-        System.out.println("Xr = "+Xr);
-        System.out.println("Yr = "+Yr);
-        System.out.println("DX = "+dx);
-        System.out.println("DY = "+dy);  
-        }
-    }
-    
-    
-    public void run2(){
-        
-         Vy = calcVy();
-         Vx = calcVx();
-        
-        double t = 2*(Vo*Math.sin(Ao))/g;
-        
-        double Xt = Vx*t;
-        double Yt = Yc + Vy*t - g*Math.pow(t, 2)/2;
-        
-        //alcance máximo em X
-        double Xr = (Math.pow(Vo, 2)*Math.sin(2*Ao))/g;
-        double Yr =0;
-        
-        double dx = Xr - Xa;
-        double dy = Yr - Ya;
-        
-        System.out.println("Saída da Simulação do canhão:");
-        System.out.println("t = "+t);
-        System.out.println("Vx = "+Vx);
-        System.out.println("Vy = "+Vy);
-        System.out.println("X(t)= "+Xt);
-        System.out.println("Y(t) = "+Yt);
-        System.out.println("Xr = "+Xr);
-        System.out.println("Yr = "+Yr);
-        System.out.println("DX = "+dx);
-        System.out.println("DY = "+dy);  
-    }
-    
-    public void run3(){
         
         Vy = calcVy();
         Vx = calcVx();
@@ -116,12 +46,18 @@ public class SistemaControlado {
         double Xt = Vx*t;
         double Yt = Yc + Vy*t - g*Math.pow(t, 2)/2;
         
+        if(!hit(10, Xt, Yt)){
+           Xt = (Math.pow(Vo, 2)*Math.sin(2*Ao))/g;//usar a posição do projétil quando atinge o solo
+            System.out.println("O alvo não foi atingido.");
+        }else{
+            System.out.println("O alvo foi atingido.");
+            done = true;
+        }
         
-        double Xr = (Math.pow(Vo, 2)*Math.sin(2*Ao))/g;//posição do projétil quando atinge o solo
-        double Yr = Yt;//altura do projetil quando passa na posição X do alvo
+        DX = Xt - Xa;
+        DY = Yt - Ya;
         
-        double dx = Xr - Xa;
-        double dy = Yr - Ya;
+        
         
         System.out.println("Saída da Simulação do canhão:");
         System.out.println("t = "+t);
@@ -129,24 +65,36 @@ public class SistemaControlado {
         System.out.println("Vy = "+Vy);
         System.out.println("X(t)= "+Xt);
         System.out.println("Y(t) = "+Yt);
-        System.out.println("Xr = "+Xr);
-        System.out.println("Yr = "+Yr);
-        System.out.println("DX = "+dx);
-        System.out.println("DY = "+dy);  
+        System.out.println("DX = "+DX);
+        System.out.println("DY = "+DY);  
     }
-    
+   
+    public boolean hit(double r, double x, double y){
+        return ( ((x-r)>=Xa && (x+r)<=Xa) && ((y-r)>=Ya && (y+r)<=Ya) );
+    }
     
     public double calcT(){
         return Xa/Vx;
    }
     
     public double calcVy(){
-        return Vo*Math.sin(this.Ao);
+        return Vo*Math.sin(Math.toRadians(this.Ao));
     }
     
     public double calcVx(){
-        return Vo*Math.cos(this.Ao);
+        return Vo*Math.cos(Math.toRadians(this.Ao));
+    }    
+
+    public double tempoDoAlcanceMax(){
+        return Vo*Math.sin(Ao)/g;
     }
-    
+
+    public double getDX() {
+        return DX;
+    }
+
+    public double getDY() {
+        return DY;
+    }
     
 }

@@ -1,0 +1,111 @@
+FUNCTION_BLOCK tipper	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	y_diff : REAL;
+	x_diff : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	angle : REAL;
+	speed : REAL;
+END_VAR
+
+// Fuzzify input variable 'service': {'poor', 'good' , 'excellent'}
+FUZZIFY x_diff
+	TERM too_long := (-200, 1) (-16,1) (-12, 0);
+	TERM long := (-14, 0) (-11,1) (-8, 1) (-5, 0);
+	TERM little_long := (-7, 0) (-5,1) (-3, 1) (-1, 0);
+	TERM little_short := (1, 0) (3, 1) (5,1) (7, 0) ; 
+	TERM short := (5, 0) (8, 1) (11,1) (14, 0);
+	TERM too_short := (12, 0) (16,1) (200, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'food': { 'rancid', 'delicious' }
+
+FUZZIFY y_diff			
+	TERM very_high := (-300, 1) (-16,1) (-12, 0);
+	TERM high := (-14, 0) (-11,1) (-8, 1) (-5, 0);
+	TERM bit_high := (-7, 0) (-5,1) (-3, 1) (-1, 0);
+	TERM bit_low := (1, 0) (3, 1) (5,1) (7, 0) ; 
+	TERM low := (5, 0) (8, 1) (11,1) (14, 0);
+	TERM very_low := (12, 0) (16,1) (300, 1);
+END_FUZZIFY
+
+// Defzzzify output variable 'tip' : {'cheap', 'average', 'generous' }
+DEFUZZIFY angle			
+	TERM much_less :=  (-2, 0) (-1.75,1) (-1.25,1) (-1,0);
+	TERM less := (-1,0) (-0.8,1) (-0.4,1) (-0.2,0);
+	TERM little_less := (-0.2,0) (-0.15,1) (-0.05,1) (0,0);
+	TERM little_more := (0,0) (0.05,1) (0.15,1) (0.2,0);
+	TERM more := (0.2, 0) (0.4, 1) (0.8, 1) (1,0);
+	TERM much_more := (1,0) (1.25,1) (1.75,1) (2,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+DEFUZZIFY speed		
+	TERM much_less :=  (-2, 0) (-1.75,1) (-1.25,1) (-1,0);
+	TERM less := (-1,0) (-0.8,1) (-0.4,1) (-0.2,0);
+	TERM little_less := (-0.2,0) (-0.15,1) (-0.05,1) (0,0);
+	TERM little_more := (0,0) (0.05,1) (0.15,1) (0.2,0);
+	TERM more := (0.2, 0) (0.4, 1) (0.8,1) (1,0);
+	TERM much_more := (1,0) (1.25,1) (1.75,1) (2,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF x_diff IS too_long and y_diff IS very_high THEN speed IS much_less, angle IS much_less;
+	RULE 2 : IF x_diff IS too_long and y_diff IS high THEN speed IS much_less, angle IS less;
+	RULE 3 : IF x_diff IS too_long and y_diff IS bit_high THEN speed IS much_less, angle IS little_less;
+	RULE 4 : IF x_diff IS too_long and y_diff IS bit_low THEN speed IS much_less, angle IS little_more;
+	RULE 5 : IF x_diff IS too_long and y_diff IS low THEN speed IS much_less, angle IS more;
+	RULE 6 : IF x_diff IS too_long and y_diff IS very_low THEN speed IS much_less, angle IS much_more;
+	
+	//RULE 25 : IF diff_vazao IS muito_abaixo and diff_temp IS muito_quente THEN out_cold IS muito_forte, out_hot IS normal;
+	
+	RULE 7 : IF x_diff IS long and y_diff IS very_high THEN speed IS less, angle IS much_less;
+	RULE 8 : IF x_diff IS long and y_diff IS high THEN speed IS less, angle IS less;
+	RULE 9 : IF x_diff IS long and y_diff IS bit_high THEN speed IS less, angle IS little_less;
+	RULE 10 : IF x_diff IS long and y_diff IS bit_low THEN speed IS less, angle IS little_more;
+	RULE 11 : IF x_diff IS long and y_diff IS low THEN speed IS less, angle IS more;
+	RULE 12 : IF x_diff IS long and y_diff IS very_low THEN speed IS less, angle IS much_more;
+	
+	RULE 13 : IF x_diff IS little_long and y_diff IS very_high THEN speed IS little_less, angle IS much_less;
+	RULE 14 : IF x_diff IS little_long and y_diff IS high THEN speed IS little_less, angle IS less;
+	RULE 15 : IF x_diff IS little_long and y_diff IS bit_high THEN speed IS little_less, angle IS little_less;
+	RULE 16 : IF x_diff IS little_long and y_diff IS bit_low THEN speed IS little_less, angle IS little_more;
+	RULE 17 : IF x_diff IS little_long and y_diff IS low THEN speed IS little_less, angle IS more;
+	RULE 18 : IF x_diff IS little_long and y_diff IS very_low THEN speed IS little_less, angle IS much_more;
+
+	RULE 19 : IF x_diff IS little_short and y_diff IS very_high THEN speed IS little_more, angle IS much_less;
+	RULE 20 : IF x_diff IS little_short and y_diff IS high THEN speed IS little_more, angle IS less;
+	RULE 21 : IF x_diff IS little_short and y_diff IS bit_high THEN speed IS little_more, angle IS little_less;
+	RULE 22 : IF x_diff IS little_short and y_diff IS bit_low THEN speed IS little_more, angle IS little_more;
+	RULE 23 : IF x_diff IS little_short and y_diff IS low THEN speed IS little_more, angle IS more;
+	RULE 24 : IF x_diff IS little_short and y_diff IS very_low THEN speed IS little_more, angle IS much_more;
+
+	RULE 25 : IF x_diff IS short and y_diff IS very_high THEN speed IS more, angle IS much_less;
+	RULE 26 : IF x_diff IS short and y_diff IS high THEN speed IS more, angle IS less;
+	RULE 27 : IF x_diff IS short and y_diff IS bit_high THEN speed IS more, angle IS little_less;
+	RULE 28 : IF x_diff IS short and y_diff IS bit_low THEN speed IS more, angle IS little_more;
+	RULE 29 : IF x_diff IS short and y_diff IS low THEN speed IS more, angle IS more;
+	RULE 30 : IF x_diff IS short and y_diff IS very_low THEN speed IS more, angle IS much_more;
+
+	RULE 31 : IF x_diff IS too_short and y_diff IS very_high THEN speed IS much_more, angle IS much_less;
+	RULE 32 : IF x_diff IS too_short and y_diff IS high THEN speed IS much_more, angle IS less;
+	RULE 33 : IF x_diff IS too_short and y_diff IS bit_high THEN speed IS much_more, angle IS little_less;
+	RULE 34 : IF x_diff IS too_short and y_diff IS bit_low THEN speed IS much_more, angle IS little_more;
+	RULE 35 : IF x_diff IS too_short and y_diff IS low THEN speed IS much_more, angle IS more;
+	RULE 36 : IF x_diff IS too_short and y_diff IS very_low THEN speed IS much_more, angle IS much_more;
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
