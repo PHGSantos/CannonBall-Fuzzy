@@ -61,14 +61,14 @@ public class Main {
                 
                 
                 if(totalAdjusts > 100) {
-                    sf.setPlot(true);
+                    sf.setDone(true);
                     System.out.println("Max executions exceeded");
                     break;
                 }
                 
                 if(sys.isDone()){
-                    sf.setPlot(true);
-                    System.out.println("finished in "+totalAdjusts +"iterations");
+                    sf.setDone(true);
+                    System.out.println("finished in "+totalAdjusts +" iterations");
                     break;
                 }
                 

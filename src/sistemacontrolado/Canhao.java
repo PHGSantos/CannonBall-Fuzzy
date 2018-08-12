@@ -55,7 +55,7 @@ public class Canhao {
         this.Voy = calcVy();
         this.Vox = calcVx();
    
-        done = hit(2);
+        done = hit(100);
         
         metrics = new double[2];
     	
@@ -187,7 +187,9 @@ public class Canhao {
         double t = calcT();
         double x = Vox*t;
         double y = Yc + Voy*t - g*Math.pow(t, 2)/2;
-        
-        return ( ((x-r)>=Xa && (x+r)<=Xa) && ((y-r)>=Ya && (y+r)<=Ya) );
+        //(2,5)   
+        //if(Ya >= y+r || mes <= 4){
+        //return (( (y-r)>=Ya && (y+r)<=Ya) );
+        return (Math.sqrt(Math.pow(x-Xa, 2) + Math.pow(y-Ya, 2)) <= r );
     }
 }
